@@ -17,7 +17,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #1a243e;
             margin: 0;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         @keyframes draw {
@@ -28,6 +28,14 @@
         .animate-draw {
             animation: draw 1.5s ease-out forwards;
         }
+
+        /* Strict uniform sizing for all cards */
+        .persona-card-fixed {
+            width: 150px !important;
+            height: 180px !important;
+            min-width: 150px !important;
+            max-width: 150px !important;
+        }
     </style>
 </head>
 <body>
@@ -37,34 +45,87 @@
         const { useState, useEffect } = React;
 
         const App = () => {
-            const [activeIndex, setActiveIndex] = useState(-1);
+            const [animIndex, setAnimIndex] = useState(-1);
             const [showConnections, setShowConnections] = useState(false);
             const [hoveredCard, setHoveredCard] = useState(null);
 
             const personaCards = [
-                { id: 1, initials: 'MR', name: 'Morgan Rao', role: 'L&D Strategist', tag: 'Capability Engine', color: '#2dd4bf', bullets: ['Build learning paths', 'Assess skill gaps', 'Create IDPs'] },
-                { id: 2, initials: 'AM', name: 'Alex Menon', role: 'HRBP', tag: 'Experience Engine', color: '#3b82f6', bullets: ['Track role risk', 'Monitor productivity', 'Flag flight risks'] },
-                { id: 3, initials: 'RK', name: 'Reese Kapoor', role: 'CHRO', tag: 'Analytics & ROI', color: '#8b5cf6', bullets: ['Measure initiative impact', 'Track platform adoption', 'Optimize HR spend'] },
-                { id: 4, initials: 'JE', name: 'Jordan Ellis', role: 'TA Manager', tag: 'Velocity Engine', color: '#f59e0b', bullets: ['Prioritize next hires', 'Manage JDs & interviews', 'Track cost-per-hire'] },
-                { id: 5, initials: 'SP', name: 'Sam Patel', role: 'Employee', tag: 'Self-Service', color: '#10b981', bullets: ['Check benefits eligibility', 'Navigate policies', 'Find the right contact'] },
-                { id: 6, initials: 'ED', name: 'Elena Diaz', role: 'Data Steward', tag: 'Compliance & Security', color: '#f43f5e', bullets: ['Monitor PII exposure', 'Audit data policies', 'Ensure compliance'] }
+                { 
+                    id: 1, 
+                    name: 'Morgan Rao', 
+                    role: 'L&D Strategist', 
+                    tag: 'Capability Engine', 
+                    color: '#2dd4bf', 
+                    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Build learning paths', 'Assess skill gaps', 'Create IDPs'] 
+                },
+                { 
+                    id: 2, 
+                    name: 'Alex Menon', 
+                    role: 'HRBP', 
+                    tag: 'Experience Engine', 
+                    color: '#3b82f6', 
+                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Track role risk', 'Monitor productivity', 'Flag flight risks'] 
+                },
+                { 
+                    id: 3, 
+                    name: 'Reese Kapoor', 
+                    role: 'CHRO', 
+                    tag: 'Analytics & ROI', 
+                    color: '#8b5cf6', 
+                    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Measure impact', 'Track adoption', 'Optimize spend'] 
+                },
+                { 
+                    id: 4, 
+                    name: 'Jordan Ellis', 
+                    role: 'TA Manager', 
+                    tag: 'Velocity Engine', 
+                    color: '#f59e0b', 
+                    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Prioritize hires', 'Manage JDs', 'Track cost-per-hire'] 
+                },
+                { 
+                    id: 5, 
+                    name: 'Sam Patel', 
+                    role: 'Employee', 
+                    tag: 'Self-Service', 
+                    color: '#10b981', 
+                    avatar: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Check benefits', 'Navigate policies', 'Find contacts'] 
+                },
+                { 
+                    id: 6, 
+                    name: 'Elena Diaz', 
+                    role: 'Data Steward', 
+                    tag: 'Compliance', 
+                    color: '#f43f5e', 
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=120&h=120&auto=format&fit=crop',
+                    bullets: ['Monitor PII', 'Audit data policies', 'Ensure security'] 
+                }
             ];
 
             useEffect(() => {
                 const runSequence = async () => {
                     await new Promise(resolve => setTimeout(resolve, 800));
+                    // Highlight cards one by one
                     for (let i = 0; i < personaCards.length; i++) {
-                        setActiveIndex(i);
+                        setAnimIndex(i);
                         await new Promise(resolve => setTimeout(resolve, 700));
                     }
+                    // Final reveal: show lines and set all cards back to normal scale
                     setShowConnections(true);
+                    setAnimIndex(-2); // -2 signals the sequence is done
                 };
                 runSequence();
             }, []);
 
             const renderCard = (card, i) => {
-                const isActive = activeIndex >= i;
-                const isHighlighted = activeIndex === i || hoveredCard === i;
+                // Card is visible if animIndex has reached it or if sequence is done (-2)
+                const isVisible = animIndex >= i || animIndex === -2;
+                // Card is "enlarged" only during its specific turn in the intro or when hovered
+                const isHighlighted = animIndex === i || hoveredCard === i;
                 
                 return (
                     <div
@@ -72,39 +133,41 @@
                         onMouseEnter={() => setHoveredCard(i)}
                         onMouseLeave={() => setHoveredCard(null)}
                         className={`
-                            relative transition-all duration-700 ease-out cursor-pointer
-                            w-40 p-3 rounded-xl border transform
-                            ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+                            persona-card-fixed relative transition-all duration-700 ease-out cursor-pointer
+                            p-3 rounded-xl border-2 transform overflow-hidden flex-shrink-0
+                            ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
                             ${isHighlighted ? 'scale-110 -translate-y-4 border-opacity-100 bg-[#0a192f] shadow-2xl z-50' : 'scale-100 border-opacity-10 bg-slate-900/40'}
                         `}
                         style={{
                             borderColor: card.color,
-                            boxShadow: isHighlighted ? `0 10px 30px ${card.color}33` : 'none'
+                            boxShadow: isHighlighted ? `0 15px 40px ${card.color}44` : 'none'
                         }}
                     >
-                        <div 
-                            className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] mb-2 shadow-inner"
-                            style={{ backgroundColor: card.color, color: '#1a243e' }}
-                        >
-                            {card.initials}
+                        <div className="flex items-start gap-2 mb-2">
+                            <div className="shrink-0 w-8 h-8 rounded-full border-2 overflow-hidden shadow-md" style={{ borderColor: card.color }}>
+                                <img src={card.avatar} alt={card.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <h3 className="text-[10px] font-black truncate text-white leading-tight">{card.name}</h3>
+                                <div className="text-[9px] font-bold mt-0.5 text-left uppercase truncate" style={{ color: card.color }}>
+                                    {card.role}
+                                </div>
+                            </div>
                         </div>
-                        <h3 className="text-[10px] font-bold mb-1 truncate">{card.name}</h3>
-                        <div 
-                            className="inline-block px-1.5 py-0.5 rounded-full text-[8px] font-bold mb-1.5 border" 
-                            style={{ borderColor: `${card.color}44`, color: card.color }}
-                        >
-                            {card.role}
+
+                        <div className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-2 border-b border-white/5 pb-1 truncate">
+                            {card.tag}
                         </div>
-                        <div className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1.5">{card.tag}</div>
-                        <ul className="space-y-1">
+
+                        <ul className="space-y-1.5">
                             {card.bullets.map((bullet, idx) => (
                                 <li 
                                     key={idx} 
-                                    className="text-[9px] text-gray-300 flex items-start gap-1" 
-                                    style={{ opacity: isHighlighted ? 1 : 0.4 }}
+                                    className="text-[10px] text-gray-200 flex items-start gap-1.5 font-medium" 
+                                    style={{ opacity: isHighlighted ? 1 : 0.6 }}
                                 >
-                                    <span className="mt-1 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: card.color }}></span>
-                                    <span className="leading-tight">{bullet}</span>
+                                    <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: card.color }}></span>
+                                    <span className="leading-tight truncate">{bullet}</span>
                                 </li>
                             ))}
                         </ul>
@@ -114,30 +177,28 @@
 
             return (
                 <div className="min-h-screen bg-[#1a243e] text-white flex flex-col items-center justify-center p-4">
-                    <div className="relative w-full max-w-[1400px] aspect-[16/8] flex flex-col items-center justify-end pb-12">
+                    <div className="relative w-full max-w-[1100px] aspect-[16/9] flex flex-col items-center justify-end pb-8">
                         
-                        {/* Connection Lines Layer */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
                             <defs>
                                 {personaCards.map((card, i) => (
                                     <linearGradient key={`grad-${i}`} id={`grad-${i}`} x1="50%" y1="80%" x2={`${50 + ((i - 2.5) * 12)}%`} y2="30%">
                                         <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0" />
-                                        <stop offset="100%" stopColor={card.color} stopOpacity="0.3" />
+                                        <stop offset="100%" stopColor={card.color} stopOpacity="0.25" />
                                     </linearGradient>
                                 ))}
                             </defs>
                             {showConnections && personaCards.map((card, i) => {
-                                // Tighter spreading for connections
-                                const x2 = 50 + (i - 2.5) * 13;
+                                const x2 = 50 + (i - 2.5) * 15.2;
                                 return (
                                     <line
                                         key={`line-${i}`}
                                         x1="50%"
                                         y1="85%"
                                         x2={`${x2}%`}
-                                        y2="40%"
+                                        y2="42%"
                                         stroke={`url(#grad-${i})`}
-                                        strokeWidth="1.5"
+                                        strokeWidth="2"
                                         strokeDasharray="1000"
                                         className="animate-draw"
                                         style={{ strokeDashoffset: 1000 }}
@@ -146,12 +207,10 @@
                             })}
                         </svg>
 
-                        {/* Top Persona Cards Row - Tighter Max-Width to center them */}
-                        <div className="relative w-full max-w-6xl flex items-end justify-center gap-4 z-20 mb-16">
+                        <div className="relative w-full flex items-end justify-center gap-2.5 z-20 mb-16 px-2">
                             {personaCards.map((card, i) => renderCard(card, i))}
                         </div>
 
-                        {/* Central Hub Area */}
                         <div className="relative z-10 flex flex-col items-center w-full">
                             <div className="relative flex justify-center w-full h-64">
                                 <div className={`absolute bottom-[-10px] transition-all duration-1000 transform ${showConnections ? 'scale-110' : 'scale-100'}`}>
@@ -173,18 +232,18 @@
 
                             <div 
                                 className={`
-                                    relative mt-[-40px] px-16 py-6 rounded-[2.5rem] border-2 transition-all duration-1000
+                                    relative mt-[-40px] px-12 py-5 rounded-[2.5rem] border-2 transition-all duration-1000
                                     flex flex-col items-center text-center backdrop-blur-2xl z-30
                                     ${showConnections ? 'border-teal-400/60 bg-[#1a243e]/95 shadow-[0_30px_60px_rgba(0,0,0,0.6)]' : 'border-white/10 bg-[#1a243e]/70'}
                                 `}
                             >
-                                <h1 className="text-5xl font-black tracking-tighter leading-none mb-1 text-white">
+                                <h1 className="text-4xl font-black tracking-tighter leading-none mb-1 text-white uppercase">
                                     NEO<span className="text-teal-400 animate-pulse">.</span>
                                 </h1>
-                                <p className="text-xs italic text-teal-100/60 font-semibold tracking-wide uppercase">
+                                <p className="text-[11px] italic text-teal-100/60 font-semibold tracking-wide uppercase">
                                     Your People Intelligence Hub
                                 </p>
-                                <div className="h-[1px] w-48 bg-gradient-to-r from-transparent via-teal-500/50 to-transparent my-3"></div>
+                                <div className="h-[1px] w-40 bg-gradient-to-r from-transparent via-teal-500/50 to-transparent my-2"></div>
                                 <p className="text-[10px] uppercase tracking-[0.3em] text-teal-400 font-black">
                                     One assistant. Every HR workflow.
                                 </p>
