@@ -31,10 +31,15 @@
 
         /* Strict uniform sizing for all cards */
         .persona-card-fixed {
-            width: 150px !important;
-            height: 180px !important;
-            min-width: 150px !important;
-            max-width: 150px !important;
+            width: 155px !important;
+            height: 195px !important;
+            min-width: 155px !important;
+            max-width: 155px !important;
+        }
+
+        /* Enhanced glow for connection lines */
+        .connection-glow {
+            filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.6));
         }
     </style>
 </head>
@@ -109,22 +114,18 @@
             useEffect(() => {
                 const runSequence = async () => {
                     await new Promise(resolve => setTimeout(resolve, 800));
-                    // Highlight cards one by one
                     for (let i = 0; i < personaCards.length; i++) {
                         setAnimIndex(i);
                         await new Promise(resolve => setTimeout(resolve, 700));
                     }
-                    // Final reveal: show lines and set all cards back to normal scale
                     setShowConnections(true);
-                    setAnimIndex(-2); // -2 signals the sequence is done
+                    setAnimIndex(-2);
                 };
                 runSequence();
             }, []);
 
             const renderCard = (card, i) => {
-                // Card is visible if animIndex has reached it or if sequence is done (-2)
                 const isVisible = animIndex >= i || animIndex === -2;
-                // Card is "enlarged" only during its specific turn in the intro or when hovered
                 const isHighlighted = animIndex === i || hoveredCard === i;
                 
                 return (
@@ -140,7 +141,7 @@
                         `}
                         style={{
                             borderColor: card.color,
-                            boxShadow: isHighlighted ? `0 15px 40px ${card.color}44` : 'none'
+                            boxShadow: isHighlighted ? `0 15px 40px ${card.color}66` : 'none'
                         }}
                     >
                         <div className="flex items-start gap-2 mb-2">
@@ -148,14 +149,19 @@
                                 <img src={card.avatar} alt={card.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <h3 className="text-[10px] font-black truncate text-white leading-tight">{card.name}</h3>
-                                <div className="text-[9px] font-bold mt-0.5 text-left uppercase truncate" style={{ color: card.color }}>
+                                <h3 className="text-[10.5px] font-black truncate text-white leading-tight">{card.name}</h3>
+                                {/* Reverted color back to matching border color as requested */}
+                                <div 
+                                    className="text-[9.5px] font-bold mt-0.5 text-left uppercase truncate" 
+                                    style={{ color: card.color }}
+                                >
                                     {card.role}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-2 border-b border-white/5 pb-1 truncate">
+                        {/* Engine Tags remain white as per previous preference */}
+                        <div className="text-[8.5px] text-white font-black uppercase tracking-wider mb-2 border-b border-white/5 pb-1 truncate">
                             {card.tag}
                         </div>
 
@@ -163,11 +169,11 @@
                             {card.bullets.map((bullet, idx) => (
                                 <li 
                                     key={idx} 
-                                    className="text-[10px] text-gray-200 flex items-start gap-1.5 font-medium" 
-                                    style={{ opacity: isHighlighted ? 1 : 0.6 }}
+                                    className="text-[11px] text-gray-100 flex items-start gap-1.5 font-medium leading-snug" 
+                                    style={{ opacity: isHighlighted ? 1 : 0.65 }}
                                 >
                                     <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: card.color }}></span>
-                                    <span className="leading-tight truncate">{bullet}</span>
+                                    <span className="truncate">{bullet}</span>
                                 </li>
                             ))}
                         </ul>
@@ -177,14 +183,16 @@
 
             return (
                 <div className="min-h-screen bg-[#1a243e] text-white flex flex-col items-center justify-center p-4">
-                    <div className="relative w-full max-w-[1100px] aspect-[16/9] flex flex-col items-center justify-end pb-8">
+                    <div className="relative w-full max-w-[1150px] aspect-[16/9] flex flex-col items-center justify-end pb-8">
                         
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                        {/* Connection Lines Layer */}
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
                             <defs>
                                 {personaCards.map((card, i) => (
                                     <linearGradient key={`grad-${i}`} id={`grad-${i}`} x1="50%" y1="80%" x2={`${50 + ((i - 2.5) * 12)}%`} y2="30%">
-                                        <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0" />
-                                        <stop offset="100%" stopColor={card.color} stopOpacity="0.25" />
+                                        <stop offset="0%" stopColor="#5eead4" stopOpacity="0.1" />
+                                        <stop offset="60%" stopColor="#2dd4bf" stopOpacity="0.5" />
+                                        <stop offset="100%" stopColor="#fff" stopOpacity="0.8" />
                                     </linearGradient>
                                 ))}
                             </defs>
@@ -198,9 +206,9 @@
                                         x2={`${x2}%`}
                                         y2="42%"
                                         stroke={`url(#grad-${i})`}
-                                        strokeWidth="2"
+                                        strokeWidth="4"
                                         strokeDasharray="1000"
-                                        className="animate-draw"
+                                        className="animate-draw connection-glow"
                                         style={{ strokeDashoffset: 1000 }}
                                     />
                                 );
@@ -218,7 +226,7 @@
                                     <img 
                                         src="./NEO_Mascot_Thumbs_UP.png" 
                                         alt="Neo" 
-                                        className={`relative h-72 w-auto object-contain z-10 transition-all duration-1000 ${showConnections ? 'brightness-110 drop-shadow-[0_0_30px_rgba(45,212,191,0.3)]' : 'brightness-90'}`}
+                                        className={`relative h-72 w-auto object-contain z-10 transition-all duration-1000 ${showConnections ? 'brightness-110 drop-shadow-[0_0_40px_rgba(45,212,191,0.4)]' : 'brightness-90'}`}
                                         onError={(e) => {
                                             e.target.style.display = 'none';
                                             const fallback = document.createElement('div');
@@ -234,13 +242,13 @@
                                 className={`
                                     relative mt-[-40px] px-12 py-5 rounded-[2.5rem] border-2 transition-all duration-1000
                                     flex flex-col items-center text-center backdrop-blur-2xl z-30
-                                    ${showConnections ? 'border-teal-400/60 bg-[#1a243e]/95 shadow-[0_30px_60px_rgba(0,0,0,0.6)]' : 'border-white/10 bg-[#1a243e]/70'}
+                                    ${showConnections ? 'border-teal-400/60 bg-[#1a243e]/95 shadow-[0_40px_80px_rgba(0,0,0,0.8)]' : 'border-white/10 bg-[#1a243e]/70'}
                                 `}
                             >
                                 <h1 className="text-4xl font-black tracking-tighter leading-none mb-1 text-white uppercase">
                                     NEO<span className="text-teal-400 animate-pulse">.</span>
                                 </h1>
-                                <p className="text-[11px] italic text-teal-100/60 font-semibold tracking-wide uppercase">
+                                <p className="text-[11px] italic text-teal-100/60 font-semibold tracking-wide uppercase text-white">
                                     Your People Intelligence Hub
                                 </p>
                                 <div className="h-[1px] w-40 bg-gradient-to-r from-transparent via-teal-500/50 to-transparent my-2"></div>
