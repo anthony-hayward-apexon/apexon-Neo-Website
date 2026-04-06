@@ -37,6 +37,16 @@
             max-width: 155px !important;
         }
 
+        /* Mobile specific sizing for better fit on small screens */
+        @media (max-width: 640px) {
+            .persona-card-fixed {
+                width: 145px !important;
+                height: 180px !important;
+                min-width: 145px !important;
+                max-width: 145px !important;
+            }
+        }
+
         /* Enhanced glow for connection lines */
         .connection-glow {
             filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.6));
@@ -150,18 +160,17 @@
                             </div>
                             <div className="flex flex-col min-w-0">
                                 <h3 className="text-[10.5px] font-black truncate text-white leading-tight">{card.name}</h3>
-                                {/* Reverted color back to matching border color as requested */}
-                                <div 
-                                    className="text-[9.5px] font-bold mt-0.5 text-left uppercase truncate" 
-                                    style={{ color: card.color }}
-                                >
+                                <div className="text-[9.5px] font-bold mt-0.5 text-left uppercase truncate text-white">
                                     {card.role}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Engine Tags remain white as per previous preference */}
-                        <div className="text-[8.5px] text-white font-black uppercase tracking-wider mb-2 border-b border-white/5 pb-1 truncate">
+                        {/* Engine Tags - Restored specific accent color */}
+                        <div 
+                            className="text-[8.5px] font-black uppercase tracking-wider mb-2 border-b pb-1 truncate"
+                            style={{ color: card.color, borderBottomColor: `${card.color}33` }}
+                        >
                             {card.tag}
                         </div>
 
@@ -183,10 +192,10 @@
 
             return (
                 <div className="min-h-screen bg-[#1a243e] text-white flex flex-col items-center justify-center p-4">
-                    <div className="relative w-full max-w-[1150px] aspect-[16/9] flex flex-col items-center justify-end pb-8">
+                    <div className="relative w-full max-w-[1150px] md:aspect-[16/9] flex flex-col items-center justify-center md:justify-end pb-8">
                         
-                        {/* Connection Lines Layer */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
+                        {/* Connection Lines Layer - Hidden on small screens as grid ruins the line targets */}
+                        <svg className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
                             <defs>
                                 {personaCards.map((card, i) => (
                                     <linearGradient key={`grad-${i}`} id={`grad-${i}`} x1="50%" y1="80%" x2={`${50 + ((i - 2.5) * 12)}%`} y2="30%">
@@ -215,22 +224,24 @@
                             })}
                         </svg>
 
-                        <div className="relative w-full flex items-end justify-center gap-2.5 z-20 mb-16 px-2">
+                        {/* Top Persona Cards Row - Grid on Mobile, Flex on Desktop */}
+                        <div className="relative w-full grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row items-center md:items-end justify-items-center justify-center gap-4 md:gap-2.5 z-20 mb-12 md:mb-16 px-2">
                             {personaCards.map((card, i) => renderCard(card, i))}
                         </div>
 
+                        {/* Central Hub Area */}
                         <div className="relative z-10 flex flex-col items-center w-full">
-                            <div className="relative flex justify-center w-full h-64">
+                            <div className="relative flex justify-center w-full h-48 md:h-64">
                                 <div className={`absolute bottom-[-10px] transition-all duration-1000 transform ${showConnections ? 'scale-110' : 'scale-100'}`}>
-                                    <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full blur-[100px] transition-all duration-1000 ${showConnections ? 'bg-teal-400/30 opacity-100' : 'bg-white/5 opacity-10'}`}></div>
+                                    <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-80 md:h-80 rounded-full blur-[60px] md:blur-[100px] transition-all duration-1000 ${showConnections ? 'bg-teal-400/30 opacity-100' : 'bg-white/5 opacity-10'}`}></div>
                                     <img 
                                         src="./NEO_Mascot_Thumbs_UP.png" 
                                         alt="Neo" 
-                                        className={`relative h-72 w-auto object-contain z-10 transition-all duration-1000 ${showConnections ? 'brightness-110 drop-shadow-[0_0_40px_rgba(45,212,191,0.4)]' : 'brightness-90'}`}
+                                        className={`relative h-48 md:h-72 w-auto object-contain z-10 transition-all duration-1000 ${showConnections ? 'brightness-110 drop-shadow-[0_0_40px_rgba(45,212,191,0.4)]' : 'brightness-90'}`}
                                         onError={(e) => {
                                             e.target.style.display = 'none';
                                             const fallback = document.createElement('div');
-                                            fallback.className = "text-8xl flex items-center justify-center h-72";
+                                            fallback.className = "text-6xl md:text-8xl flex items-center justify-center h-48 md:h-72";
                                             fallback.innerHTML = "🤖";
                                             e.target.parentNode.appendChild(fallback);
                                         }}
@@ -240,19 +251,19 @@
 
                             <div 
                                 className={`
-                                    relative mt-[-40px] px-12 py-5 rounded-[2.5rem] border-2 transition-all duration-1000
-                                    flex flex-col items-center text-center backdrop-blur-2xl z-30
+                                    relative mt-[-20px] md:mt-[-40px] px-6 md:px-12 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2.5rem] border-2 transition-all duration-1000
+                                    flex flex-col items-center text-center backdrop-blur-2xl z-30 w-full max-w-[320px] md:max-w-none
                                     ${showConnections ? 'border-teal-400/60 bg-[#1a243e]/95 shadow-[0_40px_80px_rgba(0,0,0,0.8)]' : 'border-white/10 bg-[#1a243e]/70'}
                                 `}
                             >
-                                <h1 className="text-4xl font-black tracking-tighter leading-none mb-1 text-white uppercase">
+                                <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none mb-1 text-white uppercase">
                                     NEO<span className="text-teal-400 animate-pulse">.</span>
                                 </h1>
-                                <p className="text-[11px] italic text-teal-100/60 font-semibold tracking-wide uppercase text-white">
+                                <p className="text-[10px] md:text-[11px] italic text-teal-100/60 font-semibold tracking-wide uppercase text-white">
                                     Your People Intelligence Hub
                                 </p>
-                                <div className="h-[1px] w-40 bg-gradient-to-r from-transparent via-teal-500/50 to-transparent my-2"></div>
-                                <p className="text-[10px] uppercase tracking-[0.3em] text-teal-400 font-black">
+                                <div className="h-[1px] w-32 md:w-40 bg-gradient-to-r from-transparent via-teal-500/50 to-transparent my-2"></div>
+                                <p className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-teal-400 font-black">
                                     One assistant. Every HR workflow.
                                 </p>
                             </div>
